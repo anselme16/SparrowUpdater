@@ -1,0 +1,5 @@
+build*
+*.user
+lib/*.a
+lib/*.lib
+deploy/*.exe
