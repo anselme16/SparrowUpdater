@@ -10,9 +10,11 @@ QT += network
 DESTDIR = $$lib_dir
 
 SOURCES += \
+    basicupdater.cpp \
     updaterclient.cpp \
     versionupdater.cpp
 
 HEADERS += \
+    basicupdater.h \
     updaterclient.h \
     versionupdater.h

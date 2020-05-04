@@ -91,6 +91,7 @@ void UpdaterClient::handleFile(QNetworkReply* reply, QString filename, QString d
             customAssert(file.open(QFile::WriteOnly),QString("Can't open file for writing : %1").arg(filename));
             QByteArray data = reply->readAll();
             customAssert(file.write(data) == data.size(), QString("Failed to write %1 bytes in file : %2").arg(data.size()).arg(filename));
+            file.close();
             // emit fileReceived(filename);
             if(--nbFilesPending == 0)
                 emit allFilesReceived();

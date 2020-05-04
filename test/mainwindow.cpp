@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
     
     _progress = new QProgressDialog(tr("Checking for updates..."), tr("Cancel"), 0, 0, this, defaultDialogFlags);
     _progress->setModal(true);
-    _progress->setWindowTitle(tr("Updater"));
+    _progress->setWindowTitle(tr("Updater 2"));
     _progress->show();
     _progress->setFocus();
     
@@ -56,8 +56,6 @@ void MainWindow::onProgress()
 
 void MainWindow::customUpdate()
 {
-    _updater->cleanupTmp();
-    
     _updater->getOnlineVersionInfo();
     
     connect(_updater, &VersionUpdater::onlineVersionReceived, this, [this](QString version){
@@ -79,6 +77,11 @@ void MainWindow::customUpdate()
                 QString infoStr = tr("An update is available %1 => %2 \nDo you want to download the update ? (size = %3 bytes)");
                 infoStr = infoStr.arg(qApp->applicationVersion()).arg(version).arg(size);
                 getUpdate = (QMessageBox::question(nullptr, tr("Update available"), infoStr) == QMessageBox::Yes);
+                if(!getUpdate)
+                {
+                    finished(false);
+                    return;
+                }
             }
         }
         

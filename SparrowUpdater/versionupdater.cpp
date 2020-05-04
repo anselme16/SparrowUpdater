@@ -72,13 +72,6 @@ VersionUpdater::VersionUpdater(QObject* parent, QString baseUrl)
     connect(_client, &UpdaterClient::failed, this, [this](){ emit failure(_client->errors()); });
 }
 
-void VersionUpdater::updateApplication()
-{
-    // TODO
-    // checking version
-    // bool versionOk = version == qApp->applicationVersion();
-}
-
 QStringList VersionUpdater::parseAppFolder(QStringList whitelist, QStringList blacklist)
 {
     static QStringList filepaths; // static so we only parse files once
@@ -91,13 +84,6 @@ QStringList VersionUpdater::parseAppFolder(QStringList whitelist, QStringList bl
         if(matchRegexpList(file, whitelist) && !matchRegexpList(file, blacklist))
             filteredFilePaths << file;
     return filteredFilePaths;
-}
-
-void VersionUpdater::cleanupTmp()
-{
-    QDir tmpDir(qApp->applicationDirPath() + "/" + tmpExe);
-    if(tmpDir.exists())
-        tmpDir.removeRecursively();
 }
 
 QByteArray VersionUpdater::generateVersionJson(QStringList dataFiles, QStringList exeFiles)
@@ -306,7 +292,7 @@ bool VersionUpdater::applyDataPatch()
             emit failure({tr("Source file doesn't exist : %1").arg(source + filename)});
             return false;
         }
-        if(QFileInfo::exists(target + filename))
+        /*if(QFileInfo::exists(target + filename))
         {
             if(!QFile::remove(target + filename))
             {
@@ -314,12 +300,33 @@ bool VersionUpdater::applyDataPatch()
                 return false;
             }
         }
+        if(!QDir(qApp->applicationDirPath()).mkpath(QFileInfo(filename).dir().path()))
+        {
+            emit failure({tr("Can't create folder : %1").arg(QFileInfo(filename).dir().path())});
+            return false;
+        }
         if(!QFile::copy(source + filename, target + filename))
         {
             emit failure({tr("Can't create file : %1").arg(target + filename)});
             return false;
-        }
+        }*/
     }
+    // workaround because QFile::copy fails to copy but returns true...
+    QProcess process;
+    process.setWorkingDirectory(qApp->applicationDirPath());
+    process.setProgram("xcopy");
+    process.setArguments({tmpData,".","/Y","/E","/I"});
+    do {
+        process.start();
+        process.waitForFinished();
+    }
+    while (process.exitCode() != 0);
+    
+    // remove tmpData
+    QDir tmpDir(source);
+    if(tmpDir.exists())
+        tmpDir.removeRecursively();
+    
     return true;
 }
 
@@ -339,21 +346,23 @@ bool VersionUpdater::applyExePatchAndRestart()
             }
         }
         
-        QFile batFile(source + "updater.bat");
+        QFile batFile(qApp->applicationDirPath() + '/' + "updater.bat");
         if(!batFile.open(QFile::WriteOnly | QFile::Text))
         {
-            emit failure({tr("cannot write update script : %1").arg(source + "updater.bat")});
+            emit failure({tr("cannot write update script : %1").arg(qApp->applicationDirPath() + '/' + "updater.bat")});
             return false;
         }
-        QString text =
-          ":copyit"
-          "timeout /t 1" // wait 1 second
-          "xcopy " + tmpExe + " . /Y /E /I" // try copying tmp folder into app folder
-          "IF %errorlevel% NEQ 0 GOTO copyit" // if copying failed try again
-          "start " + qApp->arguments().at(1); // start the application
+        QString text = 
+              QString(":copyit")                  + "\n"
+            + "timeout /t 1"                      + "\n"  // wait 1 second
+            + "xcopy " + tmpExe + " . /Y /E /I"   + "\n"  // try copying tmp folder into app folder
+            + "IF %errorlevel% NEQ 0 GOTO copyit" + "\n"  // if copying failed try again
+            + "rmdir " + tmpExe + " /S /Q"        + "\n"  // delete tmpExe dir
+            + "start " + qApp->arguments().at(0)  + "\n"  // start the application
+            + "DEL \"%~f0\" & EXIT"               + "\n"; // self destruct the batch file
         batFile.write(text.toUtf8());
         batFile.close();
-        return QProcess::startDetached(QString("cmd /c " + tmpExe + "/updater.bat"));
+        return QProcess::startDetached(QString("cmd /c updater.bat"));
     }
     return false; // nothing to do
 }

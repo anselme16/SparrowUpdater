@@ -141,20 +141,7 @@ public:
     
     // ====================  UTILS   ========================
     
-public slots:
-    
-    /**
-     * This will automatically go over the 3 update steps, doing all the checks and updating everything it can.
-     */
-    void updateApplication();
-    
 public:
-    
-    /**
-     * @brief cleanupTmp cleans the tmpExe folder created by a previous exe update (if it exists)
-     * it is a good practice to call this at every execution, just before updating the application
-     */
-    static void cleanupTmp();
     
     /**
      * @brief parseAppFolder recursively parses the application dir

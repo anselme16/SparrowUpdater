@@ -1,0 +1,33 @@
+{
+    "dataFileSizes": [
+        31
+    ],
+    "dataFiles": [
+        "data/test.json"
+    ],
+    "dataHashs": [
+        "XfXoePZLeFX3tmbrnl5d3CkZpt8="
+    ],
+    "exeFileSizes": [
+        6354944,
+        6498304,
+        1709568,
+        5649920,
+        115712
+    ],
+    "exeFiles": [
+        "Qt5Core.dll",
+        "Qt5Gui.dll",
+        "Qt5Network.dll",
+        "Qt5Widgets.dll",
+        "test.exe"
+    ],
+    "exeHashs": [
+        "JpjonQAr8/O0Gn7TOayt4bzEzGY=",
+        "c7Yy7oUQeGQSfiEtWMABLTmkvZg=",
+        "gC5bkBMyfkQURUsE+c1bi/mtOrY=",
+        "lnVZ7+Cfm4sUtqfN6B7Ey1FVIZw=",
+        "kz1lfEn2Am8hjmdw6CsdgigCLtg="
+    ],
+    "version": "1.0.e59a16e"
+}
